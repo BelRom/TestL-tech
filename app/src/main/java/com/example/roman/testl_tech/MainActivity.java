@@ -6,13 +6,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String BASE_URL = "http://dev-exam.l-tech.ru";
-    private RetrofitInterface service;
+    private RetrofitInterface mService;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerAdapter mAdapter;
@@ -50,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        service = retrofit.create(RetrofitInterface.class);
+        mService = retrofit.create(RetrofitInterface.class);
 
          Timer timer2 = new java.util.Timer();
          TimerTask task = new TimerTask() {
@@ -83,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void fetch(){
-        Call<List<Item>> call = service.getItem();
+        Call<List<Item>> call = mService.getItem();
         call.enqueue(new Callback<List<Item>>() {
             @Override
             public void onResponse(Call<List<Item>> call, Response<List<Item>> response) {
