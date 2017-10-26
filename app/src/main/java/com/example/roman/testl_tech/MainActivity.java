@@ -14,6 +14,8 @@ import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -24,7 +26,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private final String BASE_URL = "http://dev-exam.l-tech.ru";
-    RetrofitInterface service;
+    private RetrofitInterface service;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private RecyclerAdapter mAdapter;
@@ -33,11 +35,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        service = retrofit.create(RetrofitInterface.class);
+
+         Timer timer2 = new java.util.Timer();
+         TimerTask task = new TimerTask() {
+            public void run()
+            {
+                fetch();
+
+            }
+        };
+        timer2.schedule( task, 5000, 5000);
 
         fetch();
     }
@@ -52,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            fetch();
             return true;
         }
 
@@ -59,23 +83,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void fetch(){
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-
-        service = retrofit.create(RetrofitInterface.class);
-
         Call<List<Item>> call = service.getItem();
         call.enqueue(new Callback<List<Item>>() {
             @Override
             public void onResponse(Call<List<Item>> call, Response<List<Item>> response) {
 
                 List<Item> listItem = response.body();
+
                 recyclerView(listItem);
             }
 
@@ -89,6 +103,5 @@ public class MainActivity extends AppCompatActivity {
 
         mAdapter = new RecyclerAdapter(myDataset, this);
         mRecyclerView.setAdapter(mAdapter);
-        fetch();
     }
 }
